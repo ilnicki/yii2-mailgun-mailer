@@ -38,7 +38,7 @@ class Mailer extends BaseMailer
      * [$messageClass description]
      * @var string message default class name.
      */
-    public $messageClass = 'ilnicki\mailgunmailer\Message';
+    public $messageClass = Message::class;
 
     public $domain;
     public $key;
