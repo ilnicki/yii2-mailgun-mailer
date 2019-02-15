@@ -2,7 +2,7 @@
 Mailer for Yii 2 framework based on [Mailgun PHP SDK](https://github.com/mailgun/mailgun-php).
 
 ## Motivation
-No way I wanted to publish it now but still I am here. The package existet time ago, eventually used for once or twice, forgotten and deleted. But today I've discovered that it was used by someone in real project and after reinstalling the app went down. So I've found this one in my deep archives to keep it live on github forever. Amen.
+No way I wanted to publish it now but still I am here. The package existed time ago, eventually used for once or twice, forgotten and deleted. But today I've discovered that it was used by someone in real project and after reinstalling the app went down. So I've found this one in my deep archives to keep it live on github forever. Amen.
 
 ##Installation
 
