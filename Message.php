@@ -1,279 +1,260 @@
 <?php
 
-namespace katanyoo\mailgunmailer;
+namespace ilnicki\mailgunmailer;
 
+use yii\base\NotSupportedException;
 use yii\mail\BaseMessage;
 use Mailgun\Messages\MessageBuilder;
 
-require_once __DIR__.'/../../mailgun/mailgun-php/src/Mailgun/Constants/Constants.php';
-
 /**
- * Message implements a message class based on Mailgun.
- *
- *
- * @method Mailer getMailer() returns mailer instance.
- *
+ * Message implements a message class based on Mailgun MessageBuilder.
  *
  * @author Katanyoo Ubalee <ublee.k@gmail.com>
+ * @author Dmytro Ilnicki <dmytro@ilnicki.me>
  */
 class Message extends BaseMessage
 {
+    /**
+     * @var MessageBuilder Mailgun message instance.
+     */
+    private $messageBuilder;
 
-/*	protected $bcc;
-	protected $cc;
-	protected $charset;
-	protected $from;
-	protected $htmlBody;
-	protected $replyTo;
-	protected $subject;
-	protected $textBody;
-	protected $to;*/
+    public function init()
+    {
+        $this->messageBuilder = new MessageBuilder();
+    }
 
-	/**
-	 * @var \Mailgun\Messages\MessageBuilder Mailgun message instance.
-	 */
-	private $_messageBuilder;
+    /**
+     * @inheritdoc
+     */
+    public function getCharset()
+    {
+        return 'utf-8';
+    }
 
-	/**
-	 * @return \Swift_Message Swift message instance.
-	 */
-	public function getMessageBuilder()
-	{
-		if (!is_object($this->_messageBuilder)) {
-			$this->_messageBuilder = $this->createMessageBuilder();
-		}
+    /**
+     * @inheritdoc
+     */
+    public function setCharset($charset)
+    {
+        return $this;
+    }
 
-		return $this->_messageBuilder;
-	}
+    /**
+     * @inheritdoc
+     */
+    public function getFrom()
+    {
+        return @$this->messageBuilder->getMessage()['from'];
+    }
 
-	/**
-	 * @inheritdoc
-	 */
-	public function getCharset()
-	{
-		return 'utf-8';
-	}
+    /**
+     * @inheritdoc
+     */
+    public function setFrom($from)
+    {
+        if (!is_array($from)) {
+            $from = explode(', ', $from);
+        }
 
-	/**
-	 * @inheritdoc
-	 */
-	public function setCharset($charset)
-	{
-		return $this;
-	}
+        foreach ($from as $email => $name) {
+            if(is_string($email)) {
+                $this->messageBuilder->setFromAddress($email, ['full_name' => $name]);
+            } else {
+                $this->messageBuilder->setFromAddress($name);
+            }
+        }
 
-	/**
-	 * @inheritdoc
-	 */
-	public function getFrom()
-	{
-		return null;
-	}
+        return $this;
+    }
 
-	/**
-	 * @inheritdoc
-	 */
-	public function setFrom($from)
-	{
-		$this->getMessageBuilder()->setFromAddress($from);
+    /**
+     * @inheritdoc
+     */
+    public function getReplyTo()
+    {
+        return @$this->messageBuilder->getMessage()['h:reply-to'];
+    }
 
-		return $this;
-	}
+    /**
+     * @inheritdoc
+     */
+    public function setReplyTo($replyTo)
+    {
+        if (!is_array($replyTo)) {
+            $replyTo = explode(', ', $replyTo);
+        }
 
-	/**
-	 * @inheritdoc
-	 */
-	public function getReplyTo()
-	{
-		return null;
-	}
+        foreach ($replyTo as $email => $name) {
+            if(is_string($email)) {
+                $this->messageBuilder->setReplyToAddress($email, ['full_name' => $name]);
+            } else {
+                $this->messageBuilder->setReplyToAddress($name);
+            }
+        }
 
-	/**
-	 * @inheritdoc
-	 */
-	public function setReplyTo($replyTo)
-	{
-		$this->getMessageBuilder()->setReplyToAddress($replyTo);
+        return $this;
+    }
 
-		return $this;
-	}
+    /**
+     * @inheritdoc
+     */
+    public function getTo()
+    {
+        return @$this->messageBuilder->getMessage()['to'];
+    }
 
-	/**
-	 * @inheritdoc
-	 */
-	public function getTo()
-	{
-		return null;
-	}
+    /**
+     * @inheritdoc
+     */
+    public function setTo($to)
+    {
+        if (!is_array($to)) {
+            $to = explode(', ', $to);
+        }
 
-	/**
-	 * @inheritdoc
-	 */
-	public function setTo($to)
-	{
-		$this->getMessageBuilder()->addToRecipient($to);
+        foreach ($to as $email => $name) {
+            if(is_string($email)) {
+                $this->messageBuilder->addToRecipient($email, ['full_name' => $name]);
+            } else {
+                $this->messageBuilder->addToRecipient($name);
+            }
+        }
 
-		return $this;
-	}
+        return $this;
+    }
 
-	/**
-	 * @inheritdoc
-	 */
-	public function getCc()
-	{
-		return null;
-	}
+    /**
+     * @inheritdoc
+     */
+    public function getCc()
+    {
+        return @$this->messageBuilder->getMessage()['cc'];
+    }
 
-	/**
-	 * @inheritdoc
-	 */
-	public function setCc($cc)
-	{
-		$this->getMessageBuilder()->addCcRecipient($cc);
+    /**
+     * @inheritdoc
+     */
+    public function setCc($cc)
+    {
+        $this->messageBuilder->addCcRecipient($cc);
 
-		return $this;
-	}
+        return $this;
+    }
 
-	/**
-	 * @inheritdoc
-	 */
-	public function getBcc()
-	{
-		return null;
-	}
+    /**
+     * @inheritdoc
+     */
+    public function getBcc()
+    {
+        return @$this->messageBuilder->getMessage()['bcc'];
+    }
 
-	/**
-	 * @inheritdoc
-	 */
-	public function setBcc($bcc)
-	{
-		$this->getMessageBuilder()->addBccRecipient($bcc);
+    /**
+     * @inheritdoc
+     */
+    public function setBcc($bcc)
+    {
+        $this->messageBuilder->addBccRecipient($bcc);
 
-		return $this;
-	}
+        return $this;
+    }
 
-	/**
-	 * @inheritdoc
-	 */
-	public function getSubject()
-	{
-		return null;
-	}
+    /**
+     * @inheritdoc
+     */
+    public function getSubject()
+    {
+        return $this->messageBuilder->getMessage()['subject'];
+    }
 
-	/**
-	 * @inheritdoc
-	 */
-	public function setSubject($subject)
-	{
-		$this->getMessageBuilder()->setSubject($subject);
+    /**
+     * @inheritdoc
+     */
+    public function setSubject($subject)
+    {
+        $this->messageBuilder->setSubject($subject);
+        return $this;
+    }
 
-		return $this;
-	}
+    /**
+     * @inheritdoc
+     */
+    public function setTextBody($text)
+    {
+        $this->messageBuilder->setTextBody($text);
 
-	/**
-	 * @inheritdoc
-	 */
-	public function setTextBody($text)
-	{
-		$this->getMessageBuilder()->setTextBody($text);
+        return $this;
+    }
 
-		return $this;
-	}
+    /**
+     * @inheritdoc
+     */
+    public function setHtmlBody($html)
+    {
+        $this->messageBuilder->setHtmlBody($html);
 
-	/**
-	 * @inheritdoc
-	 */
-	public function setHtmlBody($html)
-	{
-		$this->getMessageBuilder()->setHtmlBody($html);
+        return $this;
+    }
 
-		return $this;
-	}
+    /**
+     * @inheritdoc
+     */
+    public function attach($fileName, array $options = [])
+    {
+        $this->messageBuilder->addAttachment($fileName,
+            isset($options['fileName']) ? $options['fileName'] : null);
+        return $this;
+    }
 
-	/**
-	 * @inheritdoc
-	 */
-	public function attach($fileName, array $options = [])
-	{
-		$this->getMessageBuilder()->addAttachment($fileName);
-		return $this;
-	}
+    /**
+     * @inheritdoc
+     */
+    public function attachContent($content, array $options = [])
+    {
+        throw new NotSupportedException('Content attaching is not supported yet.');
+    }
 
-	/**
-	 * @inheritdoc
-	 */
-	public function attachContent($content, array $options = [])
-	{
-		$this->getMessageBuilder()->addAttachment($content);
-		return $this;
-	}
+    /**
+     * @inheritdoc
+     */
+    public function embed($fileName, array $options = [])
+    {
+        throw new NotSupportedException('File embedding is not supported yet.');
+    }
 
-	/**
-	 * @inheritdoc
-	 */
-	public function embed($fileName, array $options = [])
-	{
-		//$this->getMessageBuilder()->addAttachment($fileName);
-		return null;
-	}
+    /**
+     * @inheritdoc
+     */
+    public function embedContent($content, array $options = [])
+    {
+        throw new NotSupportedException('Content embedding is not supported yet.');
+    }
 
-	/**
-	 * @inheritdoc
-	 */
-	public function embedContent($content, array $options = [])
-	{
-		//$this->getMessageBuilder()->addAttachment($fileName);
-		return null;
-	}
+    /**
+     * @inheritdoc
+     */
+    public function toString()
+    {
+        return json_encode($this->messageBuilder->getMessage(), JSON_PRETTY_PRINT);
+    }
 
-	/**
-	 * @inheritdoc
-	 */
-	public function toString()
-	{
-		return "mailgun_tostring()_method";
-	}
+    public function addTags($tags)
+    {
+        foreach ($tags as $tag) {
+            $this->messageBuilder->addTag($tag);
+        }
+        return $this;
+    }
 
-	public function addTags($tags)
-	{
-		foreach ($tags as $tag) {
-			$this->getMessageBuilder()->addTag($tag);
-		}
-		return $this;
-	}
-
-	/**
-	 * Set click tracking
-	 * @param Boolean|String $enabled true, false, "html"
-	 */
-	public function setClickTracking($enabled)
-	{
-		$this->getMessageBuilder()->setClickTracking($enabled);
-		return $this;
-	}
-
-	/**
-	 * @return Array message object
-	 */
-	public function getMessage()
-	{
-		return $this->getMessageBuilder()->getMessage();
-	}
-
-	/**
-	 * @return Array files list
-	 */
-	public function getFiles()
-	{
-		return $this->getMessageBuilder()->getFiles();
-	}
-
-	/**
-	 * Creates the Mailgun email message instance.
-	 * @return \MessageBldr email message instance.
-	 */
-	protected function createMessageBuilder()
-	{
-		return new MessageBuilder();
-	}
+    /**
+     * Set click tracking
+     * @param Boolean|String $enabled true, false, "html"
+     * @return $this
+     */
+    public function setClickTracking($enabled)
+    {
+        $this->messageBuilder->setClickTracking($enabled);
+        return $this;
+    }
 }

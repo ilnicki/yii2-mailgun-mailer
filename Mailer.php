@@ -1,12 +1,13 @@
 <?php
 
-namespace katanyoo\mailgunmailer;
+namespace ilnicki\mailgunmailer;
 
 use Yii;
 use yii\base\InvalidConfigException;
 use yii\mail\BaseMailer;
 
 use Mailgun\Mailgun;
+
 /**
  * Mailer implements a mailer based on Mailgun.
  *
@@ -16,7 +17,7 @@ use Mailgun\Mailgun;
  * 'components' => [
  *     ...
  *     'mailer' => [
- *         'class' => 'katanyoo\mailer\Mailer',
+ *         'class' => 'ilnicki\mailer\Mailer',
  *         'domain' => 'example.com',
  *         'key' => 'key-somekey',
  *         'tags' => ['yii'],
@@ -25,73 +26,65 @@ use Mailgun\Mailgun;
  *     ...
  * ],
  * ~~~
+ * 
+ * @package ilnicki\mailgunmailer
+ *
+ * @property-read Mailgun $mailgunMailer
  */
 class Mailer extends BaseMailer
 {
 
-	/**
-	 * [$messageClass description]
-	 * @var string message default class name.
-	 */
-	public $messageClass = 'katanyoo\mailgunmailer\Message';
+    /**
+     * [$messageClass description]
+     * @var string message default class name.
+     */
+    public $messageClass = 'ilnicki\mailgunmailer\Message';
 
-	public $domain;
-	public $key;
+    public $domain;
+    public $key;
 
-	public $fromAddress;
-	public $fromName;
-	public $tags = [];
-	public $campaignId;
-	public $enableDkim;
-	public $enableTestMode;
-	public $enableTracking;
-	public $clicksTrackingMode; // true, false, "html"
-	public $enableOpensTracking;
+    public $fromAddress;
+    public $fromName;
+    public $tags = [];
+    public $campaignId;
+    public $enableDkim;
+    public $enableTestMode;
+    public $enableTracking;
+    public $clicksTrackingMode; // true, false, "html"
+    public $enableOpensTracking;
 
-	private $_mailgunMailer;
+    private $mailgunMailerInstance;
 
-	/**
-	 * @return Mailgun Mailgun mailer instance.
-	 */
-	public function getMailgunMailer()
-	{
-		if (!is_object($this->_mailgunMailer)) {
-		    $this->_mailgunMailer = $this->createMailgunMailer();
-		}
+    /**
+     * @inheritdoc
+     */
+    protected function sendMessage($message)
+    {
+        $mailer = $this->getMailgunMailer();
 
-		return $this->_mailgunMailer;
-	}
+        $message->setClickTracking($this->clicksTrackingMode)
+            ->addTags($this->tags);
 
-	/**
-	 * @inheritdoc
-	 */
-	protected function sendMessage($message)
-	{
-		$mailer = $this->getMailgunMailer();
+        Yii::info('Sending email.', __METHOD__);
+        $response = $mailer->sendMessage($this->domain,
+            $message->getMessage(),
+            $message->getFiles()
+        );
 
+        Yii::info('Response: ' . print_r($response, true), __METHOD__);
 
-		$message->setClickTracking($this->clicksTrackingMode)
-		->addTags($this->tags);
+        return true;
+    }
 
-		Yii::info('Sending email', __METHOD__);
-		$response = $this->getMailgunMailer()->post(
-			"{$this->domain}/messages", 
-			$message->getMessage(), 
-			$message->getFiles()
-			);
+    /**
+     * @return Mailgun Mailgun mailer instance.
+     */
+    public function getMailgunMailer()
+    {
+        if (!is_object($this->mailgunMailerInstance)) {
+            $this->mailgunMailerInstance = new Mailgun($this->key);
+        }
 
-		Yii::info('Response : '.print_r($response, true), __METHOD__);
-
-		return true;
-	}
-
-	/**
-	 * Creates Mailgun mailer instance.
-	 * @return Mailgun mailer instance.
-	 */
-	protected function createMailgunMailer()
-	{
-		$mg = new Mailgun($this->key);
-		return $mg;
-	}
+        return $this->mailgunMailerInstance;
+    }
 }

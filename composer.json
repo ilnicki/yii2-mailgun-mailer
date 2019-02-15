@@ -1,6 +1,6 @@
 {
-    "name": "katanyoo/yii2-mailgun-mailer",
-    "description": "Mailgun Mailer for Yii 2 framework.",
+    "name": "ilnicki/yii2-mailgun-mailer",
+    "description": "The Mailgun Mailer for Yii 2 framework.",
     "type": "yii2-extension",
     "keywords": ["yii2","extension","mailer","mailgun"],
     "license": "BSD-3-Clause",
@@ -8,22 +8,26 @@
         {
             "name": "Katanyoo Ubalee",
             "email": "ubalee.k@gmail.com"
+        },
+        {
+            "name": "Dmytro Ilnicki",
+            "email": "dmytro@ilnicki.me"
         }
     ],
     "require": {
         "yiisoft/yii2": "*",
-        "mailgun/mailgun-php": "1.7.1"
+        "mailgun/mailgun-php": "^2.1"
     },
     "autoload": {
         "psr-4": {
-            "katanyoo\\mailgunmailer\\": "",
+            "ilnicki\\mailgunmailer\\": "",
             "Mailgun\\": ""
         }
     },
     "repositories":[
         {
             "type": "git",
-            "url": "https://github.com/katanyoo/yii2-mailgun-mailer"
+            "url": "https://github.com/ilnicki/yii2-mailgun-mailer"
         }
     ]
 }
